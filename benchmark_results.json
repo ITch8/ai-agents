@@ -1,0 +1,167 @@
+[
+  {
+    "case": "测试1 红海低利润",
+    "question": "我要不要做：手机壳（低价批发，走阿里国际站）",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试2 高门槛工业品",
+    "question": "我要不要做：工业自动化设备出口",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试3 合规敏感",
+    "question": "我要不要做：无品牌保健品出口到欧美",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试4 流量利润冲突",
+    "question": "我要不要做：低价LED灯，走量模式",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试5 供应链冲突",
+    "question": "我要不要做：定制家具出口",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试6 高利润难获客",
+    "question": "我要不要做：高端医疗设备出口",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试7 资源限制",
+    "question": "我只有10万预算，没有外贸经验，要不要做B2B出口？",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试8 渠道选择",
+    "question": "我要做宠物用品，应该选阿里国际站还是独立站？",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试9 选品",
+    "question": "我想做外贸，应该选什么产品？",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试10 扩张",
+    "question": "我现在做一个产品月利润2万，要不要扩大规模？",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  },
+  {
+    "case": "测试11 综合",
+    "question": "我在中国，有供应链资源，想做外贸，预算20万，目标是1年赚到50万，应该怎么做？",
+    "score": 2,
+    "keyword_hits": [],
+    "role_diversity": true,
+    "actionable": false,
+    "final_decision": {
+      "final_decision": "Error in analysis, using default",
+      "core_reasons": [],
+      "biggest_risk": "Error in analysis, using default",
+      "action_plan": [],
+      "confidence": 0.0
+    }
+  }
+]

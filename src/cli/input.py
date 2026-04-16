@@ -21,10 +21,10 @@ def add_common_args(
     include_ollama: bool = True,
 ) -> argparse.ArgumentParser:
     parser.add_argument(
-        "--tickers",
+        "--question",
         type=str,
-        required=require_tickers,
-        help="Comma-separated list of stock ticker symbols (e.g., AAPL,MSFT,GOOGL)",
+        required=False,
+        help="外贸决策问题（例如：我要不要做LED灯出口）",
     )
     if include_analyst_flags:
         parser.add_argument(
@@ -62,12 +62,6 @@ def add_date_args(parser: argparse.ArgumentParser, *, default_months_back: int |
             help="Start date in YYYY-MM-DD format",
         )
     return parser
-
-
-def parse_tickers(tickers_arg: str | None) -> list[str]:
-    if not tickers_arg:
-        return []
-    return [ticker.strip() for ticker in tickers_arg.split(",") if ticker.strip()]
 
 
 def select_analysts(flags: dict | None = None) -> list[str]:
@@ -211,7 +205,7 @@ def resolve_dates(start_date: str | None, end_date: str | None, *, default_month
 
 @dataclass
 class CLIInputs:
-    tickers: list[str]
+    question: str
     selected_analysts: list[str]
     model_name: str
     model_provider: str
@@ -263,7 +257,7 @@ def parse_cli_inputs(
     args = parser.parse_args()
 
     # Normalize parsed values
-    tickers = parse_tickers(getattr(args, "tickers", None))
+    question = getattr(args, "question", None) or "我要不要做某个外贸产品"
     selected_analysts = select_analysts({
         "analysts_all": getattr(args, "analysts_all", False),
         "analysts": getattr(args, "analysts", None),
@@ -272,7 +266,7 @@ def parse_cli_inputs(
     start_date, end_date = resolve_dates(getattr(args, "start_date", None), getattr(args, "end_date", None), default_months_back=default_months_back)
 
     return CLIInputs(
-        tickers=tickers,
+        question=question,
         selected_analysts=selected_analysts,
         model_name=model_name,
         model_provider=model_provider,

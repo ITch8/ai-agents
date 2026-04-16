@@ -1,6 +1,7 @@
 """Helper functions for LLM"""
 
 import json
+from typing import Any, get_args, get_origin
 from pydantic import BaseModel
 from src.llm.models import get_model, get_model_info
 from src.utils.progress import progress
@@ -70,8 +71,16 @@ def call_llm(
                 return result
 
         except Exception as e:
+            err_msg = str(e)
             if agent_name:
                 progress.update_status(agent_name, None, f"Error - retry {attempt + 1}/{max_retries}")
+
+            # Authentication/config errors won't succeed by retrying.
+            if "invalid_api_key" in err_msg or "Incorrect API key" in err_msg:
+                print(f"LLM authentication error: {err_msg}")
+                if default_factory:
+                    return default_factory()
+                return create_default_response(pydantic_model)
 
             if attempt == max_retries - 1:
                 print(f"Error in LLM call after {max_retries} attempts: {e}")
@@ -88,22 +97,46 @@ def create_default_response(model_class: type[BaseModel]) -> BaseModel:
     """Creates a safe default response based on the model's fields."""
     default_values = {}
     for field_name, field in model_class.model_fields.items():
-        if field.annotation == str:
-            default_values[field_name] = "Error in analysis, using default"
-        elif field.annotation == float:
-            default_values[field_name] = 0.0
-        elif field.annotation == int:
-            default_values[field_name] = 0
-        elif hasattr(field.annotation, "__origin__") and field.annotation.__origin__ == dict:
-            default_values[field_name] = {}
-        else:
-            # For other types (like Literal), try to use the first allowed value
-            if hasattr(field.annotation, "__args__"):
-                default_values[field_name] = field.annotation.__args__[0]
-            else:
-                default_values[field_name] = None
+        default_values[field_name] = _default_value_for_type(field.annotation)
 
     return model_class(**default_values)
+
+
+def _default_value_for_type(annotation: Any) -> Any:
+    """Return a permissive default value for common typing annotations."""
+    origin = get_origin(annotation)
+    args = get_args(annotation)
+
+    if annotation == str:
+        return "Error in analysis, using default"
+    if annotation == float:
+        return 0.0
+    if annotation == int:
+        return 0
+    if annotation == bool:
+        return False
+    if annotation == dict:
+        return {}
+    if annotation == list:
+        return []
+    if origin in (list, tuple, set):
+        return []
+    if origin is dict:
+        return {}
+
+    # Optional/Union[T, None]
+    union_name = getattr(origin, "__name__", "")
+    if "Union" in union_name or str(origin).endswith("UnionType"):
+        non_none_args = [arg for arg in args if arg is not type(None)]  # noqa: E721
+        if non_none_args:
+            return _default_value_for_type(non_none_args[0])
+        return None
+
+    # Literal[...] -> first literal value
+    if args:
+        return args[0]
+
+    return None
 
 
 def extract_json_from_response(content: str) -> dict | None:

@@ -1,24 +1,13 @@
-import sys
-
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langgraph.graph import END, StateGraph
-from colorama import Fore, Style, init
-import questionary
-from src.agents.portfolio_manager import portfolio_management_agent
-from src.agents.risk_manager import risk_management_agent
+from colorama import init
+
+from src.agents.trade_decision_agent import trade_decision_agent
 from src.graph.state import AgentState
-from src.utils.display import print_trading_output
 from src.utils.analysts import ANALYST_ORDER, get_analyst_nodes
 from src.utils.progress import progress
-from src.utils.visualize import save_graph_as_png
-from src.cli.input import (
-    parse_cli_inputs,
-)
-
-import argparse
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from src.cli.input import parse_cli_inputs
 import json
 
 # Load environment variables from .env file
@@ -42,14 +31,10 @@ def parse_hedge_fund_response(response):
         return None
 
 
-##### Run the Hedge Fund #####
-def run_hedge_fund(
-    tickers: list[str],
-    start_date: str,
-    end_date: str,
-    portfolio: dict,
+def run_trade_decision(
+    question: str,
     show_reasoning: bool = False,
-    selected_analysts: list[str] = [],
+    selected_analysts: list[str] | None = None,
     model_name: str = "gpt-4.1",
     model_provider: str = "OpenAI",
 ):
@@ -57,23 +42,19 @@ def run_hedge_fund(
     progress.start()
 
     try:
-        # Build workflow (default to all analysts when none provided)
-        workflow = create_workflow(selected_analysts if selected_analysts else None)
+        workflow = create_workflow(selected_analysts)
         agent = workflow.compile()
 
         final_state = agent.invoke(
             {
                 "messages": [
                     HumanMessage(
-                        content="Make trading decisions based on the provided data.",
+                        content=question,
                     )
                 ],
                 "data": {
-                    "tickers": tickers,
-                    "portfolio": portfolio,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "analyst_signals": {},
+                    "question": question,
+                    "agent_outputs": {},
                 },
                 "metadata": {
                     "show_reasoning": show_reasoning,
@@ -83,12 +64,13 @@ def run_hedge_fund(
             },
         )
 
+        final_decision = final_state["data"]["agent_outputs"].get("trade_decision_agent", {})
         return {
-            "decisions": parse_hedge_fund_response(final_state["messages"][-1].content),
-            "analyst_signals": final_state["data"]["analyst_signals"],
+            "question": question,
+            "final_decision": final_decision,
+            "agent_outputs": final_state["data"]["agent_outputs"],
         }
     finally:
-        # Stop progress tracking
         progress.stop()
 
 
@@ -98,33 +80,27 @@ def start(state: AgentState):
 
 
 def create_workflow(selected_analysts=None):
-    """Create the workflow with selected analysts."""
+    """Create the workflow with selected foreign trade agents."""
     workflow = StateGraph(AgentState)
     workflow.add_node("start_node", start)
 
-    # Get analyst nodes from the configuration
     analyst_nodes = get_analyst_nodes()
 
-    # Default to all analysts if none selected
     if selected_analysts is None:
         selected_analysts = list(analyst_nodes.keys())
-    # Add selected analyst nodes
+
     for analyst_key in selected_analysts:
         node_name, node_func = analyst_nodes[analyst_key]
         workflow.add_node(node_name, node_func)
         workflow.add_edge("start_node", node_name)
 
-    # Always add risk and portfolio management
-    workflow.add_node("risk_management_agent", risk_management_agent)
-    workflow.add_node("portfolio_manager", portfolio_management_agent)
+    workflow.add_node("trade_decision_agent", trade_decision_agent)
 
-    # Connect selected analysts to risk management
     for analyst_key in selected_analysts:
         node_name = analyst_nodes[analyst_key][0]
-        workflow.add_edge(node_name, "risk_management_agent")
+        workflow.add_edge(node_name, "trade_decision_agent")
 
-    workflow.add_edge("risk_management_agent", "portfolio_manager")
-    workflow.add_edge("portfolio_manager", END)
+    workflow.add_edge("trade_decision_agent", END)
 
     workflow.set_entry_point("start_node")
     return workflow
@@ -132,48 +108,18 @@ def create_workflow(selected_analysts=None):
 
 if __name__ == "__main__":
     inputs = parse_cli_inputs(
-        description="Run the hedge fund trading system",
-        require_tickers=True,
+        description="Run the foreign trade decision system",
+        require_tickers=False,
         default_months_back=None,
-        include_graph_flag=True,
+        include_graph_flag=False,
         include_reasoning_flag=True,
     )
 
-    tickers = inputs.tickers
-    selected_analysts = inputs.selected_analysts
-
-    # Construct portfolio here
-    portfolio = {
-        "cash": inputs.initial_cash,
-        "margin_requirement": inputs.margin_requirement,
-        "margin_used": 0.0,
-        "positions": {
-            ticker: {
-                "long": 0,
-                "short": 0,
-                "long_cost_basis": 0.0,
-                "short_cost_basis": 0.0,
-                "short_margin_used": 0.0,
-            }
-            for ticker in tickers
-        },
-        "realized_gains": {
-            ticker: {
-                "long": 0.0,
-                "short": 0.0,
-            }
-            for ticker in tickers
-        },
-    }
-
-    result = run_hedge_fund(
-        tickers=tickers,
-        start_date=inputs.start_date,
-        end_date=inputs.end_date,
-        portfolio=portfolio,
+    result = run_trade_decision(
+        question=inputs.question,
         show_reasoning=inputs.show_reasoning,
         selected_analysts=inputs.selected_analysts,
         model_name=inputs.model_name,
         model_provider=inputs.model_provider,
     )
-    print_trading_output(result)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
