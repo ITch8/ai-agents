@@ -1,0 +1,19 @@
+services:
+  hedge-fund:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ai-hedge-fund:prod
+    container_name: ai-agents-hedge-fund
+    volumes:
+      - ../.env:/app/.env:ro
+    command: >
+      python src/main.py
+      --ticker ${TICKER:-AAPL,MSFT,NVDA}
+      --initial-cash ${INITIAL_CASH:-100000.0}
+      --margin-requirement ${MARGIN_REQUIREMENT:-0.0}
+      ${EXTRA_ARGS:-}
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /app
+    restart: unless-stopped
